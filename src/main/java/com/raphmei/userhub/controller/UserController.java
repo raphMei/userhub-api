@@ -1,13 +1,14 @@
 package com.raphmei.userhub.controller;
 
 
+import com.raphmei.userhub.dto.RegisterRequest;
 import com.raphmei.userhub.dto.UserDTO;
 import com.raphmei.userhub.entity.User;
-import com.raphmei.userhub.repository.UserRepository;
 import com.raphmei.userhub.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,8 +22,8 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createUser(@RequestBody UserDTO userDTO) {
-        userService.createUser(userDTO);
+    public UserDTO createUser(@RequestBody RegisterRequest registerRequest) {
+        return userService.createUser(registerRequest);
     }
 
     @GetMapping("/{id}")
@@ -43,7 +44,9 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }

@@ -1,9 +1,11 @@
 package com.raphmei.userhub.service;
 
+import com.raphmei.userhub.dto.RegisterRequest;
 import com.raphmei.userhub.dto.UserDTO;
 import com.raphmei.userhub.entity.User;
 import com.raphmei.userhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,18 +18,21 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void createUser(UserDTO userDto) {
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-           throw  new RuntimeException("User with email " + userDto.getEmail() + " already exists");
+    public UserDTO createUser(RegisterRequest registerRequest) {
+        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+           throw  new RuntimeException("User with email " + registerRequest.getEmail() + " already exists");
         }
         User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setUsername(userDto.getUsername());
-        user.setRole(userDto.getRole());
+        user.setEmail(registerRequest.getEmail());
+        user.setUsername(registerRequest.getUsername());
+        user.setRole(registerRequest.getRole());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
+        return new UserDTO(user.getId(),user.getEmail(), user.getUsername(), user.getRole(), user.getCreatedAt());
     }
 
     @Override
